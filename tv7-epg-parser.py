@@ -5,12 +5,14 @@ from lxml import etree
 import dateutil.parser
 import requests
 import time
+import gzip
 
 BASE_URL = "https://tv7api2.tv.init7.net/api/"
 DATE_FORMAT = '%Y%m%d%H%M%S%z'
 MAX_DOWNLOADS = 10
-MAX_FILE_AGE = 48*60*60
-TMP_FOLDER = "tmp/"
+MAX_FILE_AGE = 20*60*60
+TMP_FOLDER = "/home/strebdom/git/tv7-epg-parser/tmp/"
+WEB_ROOT="/var/www/html/"
 arg_parser = argparse.ArgumentParser(
     description='fetch epg data from init7 and return it')
 arg_parser.add_argument('--debug', '-d', action='store_true',
@@ -199,11 +201,8 @@ with open(filename) as json_file:
  
     doctype = '<!DOCTYPE tv SYSTEM "https://github.com/XMLTV/xmltv/raw/master/xmltv.dtd">'
     document_str = etree.tostring(
-        root, pretty_print=True, xml_declaration=True, encoding="UTF-8", doctype=doctype)
+        root, pretty_print=False, xml_declaration=True, encoding="UTF-8", doctype=doctype)
 
-    xmltv_file = os.path.join(TMP_FOLDER, 'init7-xmltv' + ".xml")
-    with open(xmltv_file, 'wb') as f:
+    xmltv_file = os.path.join(WEB_ROOT, 'tv7' + ".xml.gz")
+    with gzip.open(xmltv_file, 'wb') as f:
         f.write(document_str)
-
-    with open(xmltv_file, 'r') as fin:
-        print(fin.read())
